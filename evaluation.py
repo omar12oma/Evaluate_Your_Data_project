@@ -5,8 +5,15 @@ def evaluate(csvfile):
     duplicated = duplicated_score(df)
     columns_type = columns_type_score(df)
     isna = isna_score(df)
+    l=[]
+    if (duplicated<1):
+        l.append("Duplicated Columns")
+    if (columns_type<1):
+        l.append("Columns Type")
+    if (isna<1):
+        l.append("Missing Values")
     score = 0.2*duplicated + 0.4*columns_type + 0.4*isna
-    return score*10
+    return score*100 , l
     
 def duplicated_score(df):
    Number_duplicat = df.duplicated().sum()
