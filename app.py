@@ -15,16 +15,7 @@ pages = {
 page = st.sidebar.radio("Select a page:", tuple(pages.keys()))
 
 # --- Helper Functions ---
-def color_gradient(score):
-  """Generates a color gradient from red to green based on score (0.0-1.0)."""
-  if score < 0.5:
-    red = int(255 * (1 - (score * 2)))  # Red decreases linearly from 255 to 0
-    green = int(255 * (score * 2))  # Green increases linearly from 0 to 255
-  else:
-    green = 255
-    red = 0  # Red stays at 0
-  blue = 0  # No blue component
-  return f"rgb({255}, {green}, {blue})"
+
 
 def save_leaderboard(name, score):
     if not os.path.exists("leaderboard.csv"):
@@ -35,6 +26,7 @@ def save_leaderboard(name, score):
     new_row = pd.DataFrame({"Name": [name], "Score": [score]})  # Create a DataFrame for the new row
     leaderboard = pd.concat([leaderboard, new_row], ignore_index=True)  # Use concat to append the new row
     leaderboard = leaderboard.sort_values(by="Score", ascending=False).reset_index(drop=True)
+    leaderboard.to_csv("leaderboard.csv", index=False)
     leaderboard.to_csv("leaderboard.csv", index=False) 
 
 # --- Home Page ---
@@ -44,21 +36,11 @@ if page == "Home":
 
     if csvfile is not None:
         st.write("Your CSV file has been uploaded.")
-        score = evaluate(csvfile)[0]
-        
-        score_normalized = score / 10  # Normalize to 0-1 range for color gradient
-
+        score,list_of_hints = evaluate(csvfile)
         st.markdown("---")  # Separator for better visual separation
         st.header("Your Score")
-
-        bar_color = color_gradient(score_normalized)
-        
-
         # Display the progress bar and inject the JavaScript
-        st.progress(score_normalized)
         st.write(f"Your score is: {score:.2f}")
-
-        score*=10
         # Option 3: Using a colored box
         if score >= 80:
             st.success(f"Your score is: **{score}**. Excellent!")
@@ -66,19 +48,41 @@ if page == "Home":
             st.info(f"Your score is: **{score}**. Good!")
         else:
             st.warning(f"Your score is: **{score}**. Needs improvement.")
+        if list_of_hints:
+            st.markdown("---")
+            st.write("Hints for Improvement:")    
+            for hint in list_of_hints:
+                st.caption("* "+hint)
+
+
     else:
         st.write("Please upload your CSV file.")
-
+        
 # --- Challenge Page ---
 elif page == "Challenge":
     st.title("Score Project - Challenge")
+    st.markdown("""
+                ## The Challenge:
 
+                **Your mission, if you choose to accept it, is to improve the quality of the provided dataset and achieve a higher score!**
+     
+                1. **Download the sample CSV file:** This file contains a dataset with some data quality issues.
+                2. **Clean and preprocess the data:** Use your data cleaning and preprocessing skills to address the issues in the dataset. 
+                This might involve:
+                    - Handling missing values
+                    - Correcting data types
+                    - Removing duplicates
+                    - And any other techniques you deem necessary.
+                3. **Re-upload the cleaned CSV file:** Once you're satisfied with your cleaning efforts, upload the improved dataset.
+                4. **Get your new score:** Your cleaned dataset will be evaluated, and you'll receive a new score. 
+                **Try to beat your previous score or climb the leaderboard!**
+                """)
     # Download sample CSV
-    sample_csv = pd.DataFrame({"Column1": [1, 2, 3], "Column2": ["a", "b", "c"]})  # Replace with your actual sample data
+    sample_csv = pd.read_csv("./Tuwaiq Students.csv")
     st.download_button(
-        label="Download Sample CSV",
+        label="Download Tuwaiq Students CSV file",
         data=sample_csv.to_csv(index=False),
-        file_name="sample.csv",
+        file_name="Tuwaiq Students1.csv",
         mime="text/csv",
     )
 
@@ -86,13 +90,7 @@ elif page == "Challenge":
     cleaned_csv = st.file_uploader("Upload your cleaned CSV file", type=["csv"])
     if cleaned_csv is not None:
         st.write("Your cleaned CSV file has been uploaded.")
-        cleaned_score = evaluate(cleaned_csv)[0]
-        
-        cleaned_score_normalized = cleaned_score / 100
-
-        bar_color = color_gradient(cleaned_score_normalized)
-        st.progress(cleaned_score_normalized)
-        st.write(f"Your cleaned score is: {cleaned_score:.2f}")
+        cleaned_score,list_of_hints = evaluate(cleaned_csv)
         
         if cleaned_score >= 80:
             st.success(f"Your cleaned score is: **{cleaned_score}**. Excellent!")
@@ -107,7 +105,7 @@ elif page == "Challenge":
     else:
         st.write("Please upload your cleaned CSV file.")
 elif page == "Leaderboard":
-    st.title("Score Project - Leaderboard")
+    st.title("Leaderboard:")
     if os.path.exists("leaderboard.csv"):
         leaderboard = pd.read_csv("leaderboard.csv")
         st.table(leaderboard)
