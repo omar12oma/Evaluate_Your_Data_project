@@ -50,7 +50,7 @@ if page == "Home":
             st.warning(f"Your score is: **{score}**. Needs improvement.")
         if list_of_hints:
             st.markdown("---")
-            st.write("Hints for Improvement:")    
+            st.write("Things to improve:")
             for hint in list_of_hints:
                 st.caption("* "+hint)
 
@@ -93,11 +93,11 @@ elif page == "Challenge":
         cleaned_score,list_of_hints = evaluate(cleaned_csv)
         
         if cleaned_score >= 80:
-            st.success(f"Your cleaned score is: **{cleaned_score}**. Excellent!")
+            st.success(icon="✅",body= f"Your cleaned score is: **{cleaned_score}**. Excellent!")
         elif cleaned_score >= 60:
-            st.info(f"Your cleaned score is: **{cleaned_score}**. Good!")
+            st.info(body= f"Your cleaned score is: **{cleaned_score}**. Good!")
         else:
-            st.warning(f"Your cleaned score is: **{cleaned_score}**. Needs improvement.")
+            st.warning(icon="⚠️",body= f"Your cleaned score is: **{cleaned_score}**. Needs improvement.")
         name = st.text_input("Enter your name for the leaderboard:")
         if name and st.button("Submit Score"):
             save_leaderboard(name, cleaned_score)
@@ -105,7 +105,7 @@ elif page == "Challenge":
     else:
         st.write("Please upload your cleaned CSV file.")
 elif page == "Leaderboard":
-    st.title("Leaderboard:")
+    st.title("Leaderboard")
     if os.path.exists("leaderboard.csv"):
         leaderboard = pd.read_csv("leaderboard.csv")
         st.table(leaderboard)
