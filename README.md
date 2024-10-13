@@ -1,4 +1,3 @@
-# I'm here
 # Data Cleaning Challenge
 
 **Description:**
